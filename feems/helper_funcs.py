@@ -6,6 +6,9 @@ import numpy as np
 import statsmodels.api as sm
 from copy import deepcopy
 import pandas as pd
+import networkx as nx
+import scipy as sp
+import time 
 
 # viz
 import matplotlib.pyplot as plt
@@ -265,6 +268,34 @@ def plot_estimated_vs_simulated_edges(
         ax.set_xlabel('long range edge weights')
 
     return(None)
+
+def sub_edge_get_ll(sp_Graph, old_edge, new_edge, lamb): 
+    """Function to substitute edges into an already constructed graph object, this should make the process a whole lot faster. 
+    derp...it does not, computing the gradient takes a chunk of the time versus assigning samples to nodes
+    (Edges should be tuples of length 2) 
+    """
+    sp_Graph.remove_edge(*old_edge) 
+    sp_Graph.add_edge(*new_edge)
+    
+    # sp_Graph.lre = [new_edge]
+    # sp_Graph.lre_idx = np.array([val in sp_Graph.lre for val in list(sp_Graph.edges)])
+    sp_Graph.Delta_q = nx.incidence_matrix(sp_Graph, oriented=True).T.tocsc()
+
+    sp_Graph.adj_base = sp.sparse.triu(nx.adjacency_matrix(sp_Graph), k=1)
+
+    sp_Graph.nnz_idx = sp_Graph.adj_base.nonzero()
+
+    sp_Graph.Delta = sp_Graph._create_incidence_matrix()
+
+    sp_Graph.diag_oper = sp_Graph._create_vect_matrix()
+
+    sp_Graph._create_perm_diag_op() 
+
+    sp_Graph.comp_grad_w()
+
+    sp_Graph.fit(lamb = float(lamb), optimize_q='n-dim', lamb_q=1., alpha_q=1., verbose=False)
+    obj = Joint_Objective(sp_Graph); obj.inv()
+    return -obj.neg_log_lik()
 
 def plot_residual_matrix(
     sp_Graph,

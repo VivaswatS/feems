@@ -184,7 +184,7 @@ class FeemsMix:
         self.graph[n].add_edge(*new_mrn)
         
         self.graph[n].Delta_q = nx.incidence_matrix(self.graph[1], oriented=True).T.tocsc()
-        self.graph[n].adj_base = sp.triu(nx.adjacency_matrix(self.graph[n]), k=1)
+        self.graph[n].adj_base = sp.sparse.triu(nx.adjacency_matrix(self.graph[n]), k=1)
         self.graph[n].nnz_idx = self.graph[n].adj_base.nonzero()
         self.graph[n].Delta = self.graph[n]._create_incidence_matrix()
         self.graph[n].diag_oper = self.graph[n]._create_vect_matrix()
