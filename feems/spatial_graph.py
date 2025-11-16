@@ -463,7 +463,7 @@ class SpatialGraph(nx.Graph):
         fit_dist = cov_to_dist(fit_cov)[np.tril_indices(self.n_observed_nodes, k=-1)]
         emp_dist = cov_to_dist(emp_cov)[np.tril_indices(self.n_observed_nodes, k=-1)]
 
-        res._calculate_chisq(emp_dist, fit_dist)
+        self._calculate_chisq(emp_dist, fit_dist)
 
         results[0] = {'log-lik': -nllnull, 
                      'emp_dist': emp_dist,
